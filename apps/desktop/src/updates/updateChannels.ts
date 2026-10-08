@@ -9,6 +9,14 @@ const NIGHTLY_VERSION_PATTERN = /^[^-+]+-nightly\.\d{8}\.\d+$/;
 // and no updater feed ever lists a preview release.
 const PRERELEASE_VERSION_PATTERN = /^[^-+]+-(?:nightly|preview)\.\d{8}\.\d+$/;
 
+// Personal builds (`-dev.<stamp>`) are packaged from a local branch, carry
+// Dev branding, and never check for updates.
+const PERSONAL_DEV_VERSION_PATTERN = /^[^-+]+-dev\.\d+$/;
+
+export function isPersonalDevDesktopVersion(version: string): boolean {
+  return PERSONAL_DEV_VERSION_PATTERN.test(version);
+}
+
 export function isNightlyDesktopVersion(version: string): boolean {
   return PRERELEASE_VERSION_PATTERN.test(version);
 }

@@ -2603,7 +2603,17 @@ export function resolveDesktopUpdateChannel(version: string): "latest" | "nightl
 // install can be pointed at one of these releases, and the build itself
 // reports that no update feed is configured instead of polling.
 export function isDesktopPreviewVersion(version: string): boolean {
-  return /-pr\./.test(version) || /-preview\.\d{8}\.\d+$/.test(version);
+  return (
+    /-pr\./.test(version) ||
+    /-preview\.\d{8}\.\d+$/.test(version) ||
+    isPersonalDevDesktopVersion(version)
+  );
+}
+
+// Personal `-dev.<stamp>` builds install beside the official app under their
+// own name and bundle id.
+function isPersonalDevDesktopVersion(version: string): boolean {
+  return /^[^-+]+-dev\.\d+$/.test(version);
 }
 
 export function resolveDesktopWebAssetBrand(version: string): WebAssetBrand {
@@ -2644,6 +2654,7 @@ export function resolvePackageManagerUserAgent(packageManager: string): string {
 }
 
 export function resolveDesktopProductName(version: string): string {
+  if (isPersonalDevDesktopVersion(version)) return "T3 Code (Dev)";
   return resolveDesktopUpdateChannel(version) === "nightly"
     ? "T3 Code (Nightly)"
     : (desktopPackageJson.productName ?? "T3 Code");
@@ -2669,7 +2680,7 @@ export const createBuildConfig = Effect.fn("createBuildConfig")(function* (
   arch?: typeof BuildArch.Type,
 ) {
   const buildConfig: Record<string, unknown> = {
-    appId: DESKTOP_APP_ID,
+    appId: isPersonalDevDesktopVersion(version) ? `${DESKTOP_APP_ID}.dev` : DESKTOP_APP_ID,
     productName: resolveDesktopProductName(version),
     artifactName: "T3-Code-${version}-${arch}.${ext}",
     electronLanguages: [...DESKTOP_ELECTRON_LANGUAGES],
