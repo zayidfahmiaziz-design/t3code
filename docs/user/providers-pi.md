@@ -24,7 +24,9 @@ use Pi's native session files for resume, rollback, and forks within the same Pi
 preserve the native conversation through the selected turn in the destination workspace.
 Switching providers uses portable conversation context. Extension
 dialogs appear in the T3 Code composer, and the composer context meter follows Pi's own usage
-reporting while a response streams and after it settles.
+reporting while a response streams and after it settles. Once a response settles, the meter's
+details also list the session's input, cached, and output tokens, tool calls, and Pi's estimated
+cost in USD.
 
 Pi skills appear in the composer's `$` menu. This includes user skills and project skills that Pi
 loads for the current workspace; selecting one uses Pi's native skill expansion.

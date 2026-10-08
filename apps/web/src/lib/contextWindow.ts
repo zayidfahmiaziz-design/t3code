@@ -55,11 +55,11 @@ export function deriveLatestContextWindowSnapshot(
       lastCachedInputTokens: null,
       lastOutputTokens: null,
       lastReasoningOutputTokens: null,
-      toolUses: null,
+      toolUses: liveUsage.toolUses ?? null,
       durationMs: null,
       compactsAutomatically: true,
       autoCompactThreshold: null,
-      cost: null,
+      cost: liveUsage.cost ?? null,
       updatedAt: liveUsage.updatedAt,
     };
   }

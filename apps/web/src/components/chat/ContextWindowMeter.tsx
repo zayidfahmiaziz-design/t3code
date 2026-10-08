@@ -18,6 +18,25 @@ function formatPercentage(value: number | null): string | null {
   return `${Math.round(value)}%`;
 }
 
+/** Popup rows for the usage details a provider reported; unreported ones are omitted. */
+function contextWindowStatRows(
+  usage: ContextWindowSnapshot,
+): ReadonlyArray<{ readonly label: string; readonly value: string }> {
+  const tokenRow = (label: string, value: number | null | undefined) =>
+    value != null && value > 0 ? [{ label, value: formatContextWindowTokens(value) }] : [];
+  const { toolUses, cost } = usage;
+  return [
+    ...tokenRow("Input", usage.inputTokens),
+    ...tokenRow("Cached input", usage.cachedInputTokens),
+    ...tokenRow("Output", usage.outputTokens),
+    ...tokenRow("Total processed", usage.totalProcessedTokens),
+    ...(toolUses != null && toolUses > 0
+      ? [{ label: "Tool calls", value: toolUses.toLocaleString() }]
+      : []),
+    ...(cost != null ? [{ label: "Cost", value: formatContextWindowCost(cost) }] : []),
+  ];
+}
+
 export function ContextWindowMeter(props: {
   usage: ContextWindowSnapshot;
   modelDisplayName?: string | null;
@@ -31,8 +50,7 @@ export function ContextWindowMeter(props: {
   const radius = 9.75;
   const circumference = 2 * Math.PI * radius;
   const dashOffset = circumference * (1 - normalizedPercentage / 100);
-  const totalProcessedTokens = usage.totalProcessedTokens ?? null;
-  const showTotalProcessed = totalProcessedTokens !== null && totalProcessedTokens > 0;
+  const statRows = contextWindowStatRows(usage);
   const isOverloaded = normalizedPercentage > 90;
   const usageColor = isOverloaded
     ? "var(--color-error)"
@@ -128,22 +146,15 @@ export function ContextWindowMeter(props: {
               />
             </div>
           ) : null}
-          {showTotalProcessed ? (
-            <div className="flex items-center justify-between gap-3 text-2xs leading-4">
-              <span className="text-secondary-label">Total processed</span>
-              <span className="font-medium tabular-nums text-secondary-label">
-                {formatContextWindowTokens(totalProcessedTokens)}
-              </span>
+          {statRows.map((row) => (
+            <div
+              key={row.label}
+              className="flex items-center justify-between gap-3 text-2xs leading-4"
+            >
+              <span className="text-secondary-label">{row.label}</span>
+              <span className="font-medium tabular-nums text-secondary-label">{row.value}</span>
             </div>
-          ) : null}
-          {usage.cost != null ? (
-            <div className="flex items-center justify-between gap-3 text-2xs leading-4">
-              <span className="text-secondary-label">Cost</span>
-              <span className="font-medium tabular-nums text-secondary-label">
-                {formatContextWindowCost(usage.cost)}
-              </span>
-            </div>
-          ) : null}
+          ))}
           {usage.compactsAutomatically ? (
             <div className="mt-1 text-pretty text-secondary-label text-2xs font-medium">
               {formatContextWindowCompactionMessage(modelDisplayName, usage.autoCompactThreshold)}

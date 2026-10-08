@@ -648,12 +648,19 @@ export function makePiAdapterV2(
         const inputTokens = nonNegativeInteger(totals, "input");
         const cachedInputTokens = nonNegativeInteger(totals, "cacheRead");
         const outputTokens = nonNegativeInteger(totals, "output");
+        const toolUses = nonNegativeInteger(stats, "toolCalls");
+        // Pi prices the session from its model catalog in USD.
+        const costUsd = recordNumber(stats, "cost");
         return {
           usedTokens,
           maxTokens,
           ...(inputTokens === undefined ? {} : { inputTokens }),
           ...(cachedInputTokens === undefined ? {} : { cachedInputTokens }),
           ...(outputTokens === undefined ? {} : { outputTokens }),
+          ...(toolUses === undefined ? {} : { toolUses }),
+          ...(costUsd === undefined || costUsd < 0
+            ? {}
+            : { cost: { amount: costUsd, currency: "USD" } }),
           updatedAt: DateTime.formatIso(updatedAt),
         };
       };

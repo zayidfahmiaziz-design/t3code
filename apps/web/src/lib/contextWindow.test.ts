@@ -80,4 +80,16 @@ describe("live provider-turn usage (#8144)", () => {
     expect(snapshot?.maxTokens).toBeNull();
     expect(snapshot?.usedPercentage).toBeNull();
   });
+
+  it("carries tool calls and cost from the provider's report", () => {
+    const snapshot = deriveLatestContextWindowSnapshot([], {
+      usedTokens: 1_814,
+      maxTokens: 1_048_576,
+      toolUses: 3,
+      cost: { amount: 0.0123, currency: "USD" },
+      updatedAt: "2026-08-27T00:00:00.000Z",
+    });
+    expect(snapshot?.toolUses).toBe(3);
+    expect(snapshot?.cost).toEqual({ amount: 0.0123, currency: "USD" });
+  });
 });

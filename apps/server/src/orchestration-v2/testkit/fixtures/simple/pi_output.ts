@@ -53,6 +53,8 @@ export function assertPiSettledTokenUsage(
       inputTokens: field(tokens, "input"),
       cachedInputTokens: field(tokens, "cacheRead"),
       outputTokens: field(tokens, "output"),
+      toolUses: field(stats[index], "toolCalls"),
+      cost: { amount: field(stats[index], "cost"), currency: "USD" },
     });
   }
 }

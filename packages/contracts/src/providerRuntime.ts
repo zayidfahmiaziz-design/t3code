@@ -260,6 +260,13 @@ const ThreadMetadataUpdatedPayload = Schema.Struct({
 });
 export type ThreadMetadataUpdatedPayload = typeof ThreadMetadataUpdatedPayload.Type;
 
+/** Spend the provider reports for its session, in the provider's currency. */
+export const ProviderUsageCost = Schema.Struct({
+  amount: Schema.Number.check(Schema.isFinite()),
+  currency: TrimmedNonEmptyStringSchema.check(Schema.isMaxLength(32)),
+});
+export type ProviderUsageCost = typeof ProviderUsageCost.Type;
+
 export const ThreadTokenUsageSnapshot = Schema.Struct({
   usedTokens: NonNegativeInt,
   totalProcessedTokens: Schema.optional(NonNegativeInt),
@@ -277,12 +284,7 @@ export const ThreadTokenUsageSnapshot = Schema.Struct({
   durationMs: Schema.optional(NonNegativeInt),
   compactsAutomatically: Schema.optional(Schema.Boolean),
   autoCompactThreshold: Schema.optional(PositiveInt),
-  cost: Schema.optional(
-    Schema.Struct({
-      amount: Schema.Number.check(Schema.isFinite()),
-      currency: TrimmedNonEmptyStringSchema.check(Schema.isMaxLength(32)),
-    }),
-  ),
+  cost: Schema.optional(ProviderUsageCost),
 });
 export type ThreadTokenUsageSnapshot = typeof ThreadTokenUsageSnapshot.Type;
 
