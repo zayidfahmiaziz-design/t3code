@@ -267,6 +267,7 @@ it.layer(NodeServices.layer)("build-desktop-artifact", (it) => {
     assert.equal(resolveDesktopProductName("0.0.17"), "T3 Code (Alpha)");
     assert.equal(resolveDesktopProductName("0.0.17-nightly.20260413.42"), "T3 Code (Nightly)");
     assert.equal(resolveDesktopProductName("0.0.17-dev.202610081200"), "T3 Code (Dev)");
+    assert.equal(resolveDesktopProductName("0.0.17-practice.202610181800"), "T3 Code (Practice)");
   });
 
   it("switches desktop packaging icons to the nightly artwork for nightly versions", () => {
