@@ -12,6 +12,7 @@ import * as DesktopUserData from "./DesktopUserData.ts";
 const resolveWindowsUserData = (appDataDirectory: string) =>
   DesktopUserData.resolveUserDataPath({
     appDataDirectory,
+    appVersion: "0.0.45",
     isDevelopment: false,
     platform: "win32",
   }).pipe(Effect.provide(DesktopPreReadyFileSystem.layer));

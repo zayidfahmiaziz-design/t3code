@@ -4,6 +4,8 @@ import * as Path from "effect/Path";
 import * as PlatformError from "effect/PlatformError";
 import * as Schema from "effect/Schema";
 
+import { isPersonalPracticeDesktopVersion } from "../updates/updateChannels.ts";
+
 export class DesktopUserDataInitializationError extends Schema.TaggedError<DesktopUserDataInitializationError>()(
   "DesktopUserDataInitializationError",
   {
@@ -35,11 +37,17 @@ export class DesktopUserDataInitializationError extends Schema.TaggedError<Deskt
 export const resolveUserDataPath = Effect.fn("desktop.userData.resolveUserDataPath")(
   function* (input: {
     readonly appDataDirectory: string;
+    readonly appVersion: string;
     readonly isDevelopment: boolean;
     readonly platform: NodeJS.Platform;
   }) {
     const fs = yield* FileSystem.FileSystem;
     const path = yield* Path.Path;
+    // Practice builds may hold an EHR login, so their cookies and storage never
+    // share a profile with another build, and nothing is copied in from one.
+    if (!input.isDevelopment && isPersonalPracticeDesktopVersion(input.appVersion)) {
+      return path.join(input.appDataDirectory, "t3code-practice");
+    }
     const names = input.isDevelopment
       ? { current: "t3code-dev", legacy: "T3 Code (Dev)" }
       : { current: "t3code-v2", legacy: "T3 Code (Alpha)" };
