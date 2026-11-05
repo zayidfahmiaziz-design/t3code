@@ -2718,7 +2718,24 @@ export function resolveDesktopUpdateChannel(version: string): "latest" | "nightl
 }
 
 export function isDesktopPreviewVersion(version: string): boolean {
-  return /-pr\./.test(version) || /-preview\.\d{8}\.\d+$/.test(version);
+  return (
+    /-pr\./.test(version) ||
+    /-preview\.\d{8}\.\d+$/.test(version) ||
+    isPersonalDevDesktopVersion(version) ||
+    isPersonalPracticeDesktopVersion(version)
+  );
+}
+
+// Personal `-dev.<stamp>` builds install beside the official app under their
+// own name and bundle id.
+function isPersonalDevDesktopVersion(version: string): boolean {
+  return /^[^-+]+-dev\.\d+$/.test(version);
+}
+
+// Personal `-practice.<stamp>` builds: the same, as a third app with its own
+// name, bundle id and browser profile, so logins never cross from Dev.
+function isPersonalPracticeDesktopVersion(version: string): boolean {
+  return /^[^-+]+-practice\.\d+$/.test(version);
 }
 
 export function resolveDesktopWebAssetBrand(version: string): WebAssetBrand {
@@ -2757,6 +2774,8 @@ export function resolvePackageManagerUserAgent(packageManager: string): string {
 }
 
 export function resolveDesktopProductName(version: string): string {
+  if (isPersonalDevDesktopVersion(version)) return "T3 Code (Dev)";
+  if (isPersonalPracticeDesktopVersion(version)) return "T3 Code (Practice)";
   return resolveDesktopUpdateChannel(version) === "nightly"
     ? "T3 Code (Nightly)"
     : (desktopPackageJson.productName ?? "T3 Code");
@@ -2780,7 +2799,11 @@ export const createBuildConfig = Effect.fn("createBuildConfig")(function* (
 ) {
   const buildConfig: Record<string, unknown> = {
     afterPack: (yield* Path.Path).join(yield* RepoRoot, "scripts/prepare-server-compile-cache.cjs"),
-    appId: DESKTOP_APP_ID,
+    appId: isPersonalDevDesktopVersion(version)
+      ? `${DESKTOP_APP_ID}.dev`
+      : isPersonalPracticeDesktopVersion(version)
+        ? `${DESKTOP_APP_ID}.practice`
+        : DESKTOP_APP_ID,
     productName: resolveDesktopProductName(version),
     artifactName: "T3-Code-${version}-${arch}.${ext}",
     electronLanguages: [...DESKTOP_ELECTRON_LANGUAGES],

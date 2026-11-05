@@ -12,6 +12,8 @@ import * as NodeServices from "@effect/platform-node/NodeServices";
 // @effect-diagnostics-next-line nodeBuiltinImport:off - Version output must flush before Electron exits, without acquiring the runtime.
 import * as NodeFS from "node:fs";
 import * as NodeOS from "node:os";
+// @effect-diagnostics-next-line nodeBuiltinImport:off - Practice defaults are applied before the runtime exists.
+import * as NodePath from "node:path";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import * as Option from "effect/Option";
@@ -38,6 +40,7 @@ import * as DesktopApp from "./app/DesktopApp.ts";
 import * as DesktopAppActivation from "./app/DesktopAppActivation.ts";
 import * as DesktopWebLinks from "./app/DesktopWebLinks.ts";
 import * as DesktopAppIdentity from "./app/DesktopAppIdentity.ts";
+import { applyPracticeEnvironmentDefaults } from "./app/DesktopPracticeEnvironment.ts";
 import * as DesktopConnectionCatalogStore from "./app/DesktopConnectionCatalogStore.ts";
 import * as DesktopClerk from "./app/DesktopClerk.ts";
 import * as DesktopCliCommand from "./app/DesktopCliCommand.ts";
@@ -88,6 +91,15 @@ if (process.argv.includes("--version")) {
   }
   Electron.app.exit(0);
 }
+
+// Before any config is read: the desktop, its backend and its telemetry all take
+// these from process.env.
+applyPracticeEnvironmentDefaults({
+  env: process.env,
+  appVersion: Electron.app.getVersion(),
+  homeDirectory: NodeOS.homedir(),
+  joinPath: NodePath.join,
+});
 
 const layerDesktopEnvironment = Layer.unwrap(
   Effect.gen(function* () {

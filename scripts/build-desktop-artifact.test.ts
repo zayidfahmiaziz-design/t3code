@@ -496,6 +496,38 @@ it.layer(NodeServices.layer)("build-desktop-artifact", (it) => {
     }),
   );
 
+  it.effect("installs personal dev and practice builds as their own apps with no update feed", () =>
+    Effect.gen(function* () {
+      for (const [version, name, suffix] of [
+        ["0.1.8-dev.202611051200", "T3 Code (Dev)", ".dev"],
+        ["0.1.8-practice.202611051200", "T3 Code (Practice)", ".practice"],
+      ] as const) {
+        const config = yield* createBuildConfig(
+          "win",
+          "nsis",
+          version,
+          false,
+          false,
+          undefined,
+          undefined,
+        );
+        assert.equal(config.productName, name);
+        assert.isTrue(String(config.appId).endsWith(suffix));
+        assert.isNull(config.publish);
+      }
+      const release = yield* createBuildConfig(
+        "win",
+        "nsis",
+        "0.1.8",
+        false,
+        false,
+        undefined,
+        undefined,
+      );
+      assert.isFalse(String(release.appId).endsWith(".practice"));
+    }),
+  );
+
   it.effect("omits update feeds for pull request preview builds", () =>
     Effect.gen(function* () {
       const preview = yield* createBuildConfig(
